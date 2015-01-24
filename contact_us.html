@@ -1,0 +1,373 @@
+﻿<?php
+   function ValidateEmail($email)
+   {
+      $pattern = '/^([0-9a-z]([-.\w]*[0-9a-z])*@(([0-9a-z])+([-\w]*[0-9a-z])*\.)+[a-z]{2,6})$/i';
+      return preg_match($pattern, $email);
+   }
+
+   if ($_SERVER['REQUEST_METHOD'] == 'POST')
+   {
+      $mailto = 'markobabic@msn.com';
+      $mailfrom = isset($_POST['email']) ? $_POST['email'] : $mailto;
+      $subject = 'Contact Information';
+      $message = 'Values submitted from web site form:';
+      $success_url = '';
+      $error_url = '';
+      $error = '';
+      $eol = "\n";
+      $max_filesize = isset($_POST['filesize']) ? $_POST['filesize'] * 1024 : 1024000;
+      $boundary = md5(uniqid(time()));
+
+      $header  = 'From: '.$mailfrom.$eol;
+      $header .= 'Reply-To: '.$mailfrom.$eol;
+      $header .= 'MIME-Version: 1.0'.$eol;
+      $header .= 'Content-Type: multipart/mixed; boundary="'.$boundary.'"'.$eol;
+      $header .= 'X-Mailer: PHP v'.phpversion().$eol;
+      if (!ValidateEmail($mailfrom))
+      {
+         $error .= "The specified email address is invalid!\n<br>";
+      }
+
+      if (!empty($error))
+      {
+         $errorcode = file_get_contents($error_url);
+         $replace = "##error##";
+         $errorcode = str_replace($replace, $error, $errorcode);
+         echo $errorcode;
+         exit;
+      }
+
+      $internalfields = array ("submit", "reset", "send", "captcha_code");
+      $message .= $eol;
+      $message .= "IP Address : ";
+      $message .= $_SERVER['REMOTE_ADDR'];
+      $message .= $eol;
+      foreach ($_POST as $key = $value)
+      
+      if (!in_array(strtolower($key), $internalfields))
+      {
+            if (!is_array($value))
+            {
+               $message .= ucwords(str_replace("_", " ", $key)) . " : " . $value . $eol;
+            }
+            else
+            {
+               $message .= ucwords(str_replace("_", " ", $key)) . " : " . implode(",", $value) . $eol;
+            }
+      }
+  
+
+      $body  = 'This is a multi-part message in MIME format.'.$eol.$eol;
+      $body .= '--'.$boundary.$eol;
+      $body .= 'Content-Type: text/plain; charset=ISO-8859-1'.$eol;
+      $body .= 'Content-Transfer-Encoding: 8bit'.$eol;
+      $body .= $eol.stripslashes($message).$eol;
+      if (!empty($_FILES))
+      {
+          foreach ($_FILES as $key = $value)
+          {
+             if ($_FILES[$key]['error'] == 0 && $_FILES[$key]['size'] <= $max_filesize)
+             {
+                $body .= '--'.$boundary.$eol;
+                $body .= 'Content-Type: '.$_FILES[$key]['type'].'; name='.$_FILES[$key]['name'].$eol;
+                $body .= 'Content-Transfer-Encoding: base64'.$eol;
+                $body .= 'Content-Disposition: attachment; filename='.$_FILES[$key]['name'].$eol;
+                $body .= $eol.chunk_split(base64_encode(file_get_contents($_FILES[$key]['tmp_name']))).$eol;
+             }
+         }
+      }
+      $body .= '--'.$boundary.'--'.$eol;
+      if ($mailto != '')
+      {
+         mail($mailto, $subject, $body, $header);
+      }
+      header('Location: '.$success_url);
+      exit;
+   }
+?>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Unbenannte Seite</title>
+<style type="text/css">
+div#container
+{
+   width: 969px;
+   position: relative;
+   margin-top: 0px;
+   margin-left: auto;
+   margin-right: auto;
+   text-align: left;
+}
+body
+{
+   font-size: 8px;
+   line-height: 1.1875;
+   text-align: center;
+   margin: 0;
+   background-color: #089dc7;
+   background-image: url(images/body-bg.jpg);
+   background-repeat: no-repeat;
+   background-position: center top;
+   color: #000000;
+}
+</style>
+<style type="text/css">
+a
+{
+   color: #0000FF;
+   text-decoration: underline;
+}
+a:visited
+{
+   color: #800080;
+}
+a:active
+{
+   color: #FF0000;
+}
+a:hover
+{
+   color: #0000FF;
+   text-decoration: underline;
+}
+</style>
+<style type="text/css">
+#Image1
+{
+   border: 0px #000000 solid;
+}
+#Image6
+{
+   border: 0px #000000 solid;
+}
+#Shape7
+{
+   width: 157px;
+   height: 45px;
+   background-color: #FFFFFF;
+   border: 0px #A0A0A0 solid;
+}
+#Shape7_text
+{
+   position: absolute;
+   left: 1px;
+   top: 8px;
+   width: 155px;
+   height: 36px;
+   overflow: hidden;
+   text-align: center;
+}
+#wb_Text5 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text5 div
+{
+   text-align: left;
+}
+#wb_Text6 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text6 div
+{
+   text-align: left;
+}
+#wb_Text7 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text7 div
+{
+   text-align: left;
+}
+#wb_Form1
+{
+   background-color: #FAFAFA;
+   border: 0px #000000 solid;
+}
+#wb_Text1 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text1 div
+{
+   text-align: left;
+}
+#Editbox1
+{
+   border: 1px #000000 solid;
+   background-color: #FFFFFF;
+   color :#000000;
+   font-family: Arial;
+   font-size: 13px;
+   text-align: left;
+   vertical-align: middle;
+}
+#wb_Text2 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text2 div
+{
+   text-align: left;
+}
+#Editbox2
+{
+   border: 1px #000000 solid;
+   background-color: #FFFFFF;
+   color :#000000;
+   font-family: Arial;
+   font-size: 13px;
+   text-align: left;
+   vertical-align: middle;
+}
+#wb_Text3 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text3 div
+{
+   text-align: left;
+}
+#Editbox3
+{
+   border: 1px #000000 solid;
+   background-color: #FFFFFF;
+   color :#000000;
+   font-family: Arial;
+   font-size: 13px;
+   text-align: left;
+   vertical-align: middle;
+}
+#wb_Text4 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text4 div
+{
+   text-align: left;
+}
+#Editbox4
+{
+   border: 1px #000000 solid;
+   background-color: #FFFFFF;
+   color :#000000;
+   font-family: Arial;
+   font-size: 13px;
+   text-align: left;
+   vertical-align: middle;
+}
+#wb_Text8 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text8 div
+{
+   text-align: left;
+}
+#Editbox5
+{
+   border: 1px #000000 solid;
+   background-color: #FFFFFF;
+   color :#000000;
+   font-family: Arial;
+   font-size: 13px;
+   text-align: left;
+   vertical-align: middle;
+}
+#Button1
+{
+   border: 1px #A9A9A9 solid;
+   background-color: #089DC7;
+   color: #000000;
+   font-family: Arial;
+   font-size: 13px;
+}
+#Button2
+{
+   border: 1px #A9A9A9 solid;
+   background-color: #089DC7;
+   color: #000000;
+   font-family: Arial;
+   font-size: 13px;
+}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="wb_Shape1" style="position:absolute;left:22px;top:459px;width:923px;height:541px;z-index:12;">
+<img src="images/white2.png" id="Shape1" alt="" style="border-width:0;width:923px;height:541px;"></div>
+<div id="wb_Image1" style="position:absolute;left:34px;top:470px;width:900px;height:300px;z-index:14;">
+<img src="images/contact.jpg" id="Image1" alt="" style="width:900px;height:300px;"></div>
+<div id="wb_Shape3" style="position:absolute;left:146px;top:419px;width:222px;height:43px;z-index:15;">
+<a href="./apartment-1.html"><img src="images/accommodation.png" id="Shape3" alt="" style="border-width:0;width:222px;height:43px;"></a></div>
+<div id="wb_Shape4" style="position:absolute;left:372px;top:419px;width:170px;height:43px;z-index:16;">
+<a href="./our_location.html"><img src="images/our-location.png" id="Shape4" alt="" style="border-width:0;width:170px;height:43px;"></a></div>
+<div id="wb_Shape5" style="position:absolute;left:546px;top:419px;width:170px;height:43px;z-index:17;">
+<a href="./about_porec.html"><img src="images/about-porec.png" id="Shape5" alt="" style="border-width:0;width:170px;height:43px;"></a></div>
+<div id="wb_Shape6" style="position:absolute;left:720px;top:419px;width:115px;height:43px;z-index:18;">
+<a href="./contact_us.html"><img src="images/contact_black.png" id="Shape6" alt="" style="border-width:0;width:115px;height:43px;"></a></div>
+<div id="wb_Image6" style="position:absolute;left:417px;top:103px;width:600px;height:123px;z-index:19;">
+<img src="images/A&K-Apartments.png" id="Image6" alt="" style="width:600px;height:123px;"></div>
+<div id="wb_Shape7" style="position:absolute;left:66px;top:701px;width:157px;height:45px;z-index:20;">
+<div id="Shape7"><div id="Shape7_text"><span style="color:#000000;font-family:'Adobe Devanagari';font-size:27px;"><strong><em>Contact Us</em></strong></span></div></div></div>
+<div id="wb_Shape8" style="position:absolute;left:33px;top:419px;width:109px;height:43px;z-index:21;">
+<a href="./index.html"><img src="images/apartmentporec.png" id="Shape8" alt="" style="border-width:0;width:109px;height:43px;"></a></div>
+<div id="wb_Text5" style="position:absolute;left:37px;top:1031px;width:420px;height:19px;z-index:22;text-align:left;">
+<span style="color:#000000;font-family:Arial;font-size:17px;"><strong>Contact us</strong></span></div>
+<div id="wb_Text6" style="position:absolute;left:38px;top:1064px;width:201px;height:45px;z-index:23;text-align:left;"><span style="color:#000000;font-family:Arial;font-size:12px;">Contact person:<span dir="ltr"> Ana Babić</span><br>
+Phone: 00385 <span dir="ltr">95 845 7621</span><br>
+<span dir="ltr">Piantade 43, Varvari</span>, <span dir="ltr">52440 Poreč </span></span></div>
+<div id="wb_Text7" style="position:absolute;left:409px;top:1142px;width:151px;height:14px;z-index:24;text-align:left;">
+<span style="color:#000000;font-family:Arial;font-size:11px;">© 2014 A&amp;K Apartments</span></div>
+<div id="wb_Form1" style="position:absolute;left:29px;top:779px;width:304px;height:244px;z-index:25;">
+<form name="Contact_Us" method="post" action="<?php echo basename(__FILE__); ?>" enctype="multipart/form-data" id="Form1">
+<div id="wb_Text1" style="position:absolute;left:10px;top:15px;width:62px;height:16px;z-index:0;text-align:left;">
+<span style="color:#000000;font-family:Arial;font-size:13px;">Name:</span></div>
+<input type="text" id="Editbox1" style="position:absolute;left:82px;top:15px;width:198px;height:23px;line-height:23px;z-index:1;" name="name" value="">
+<div id="wb_Text2" style="position:absolute;left:11px;top:45px;width:62px;height:16px;z-index:2;text-align:left;">
+<span style="color:#000000;font-family:Arial;font-size:13px;">Email:</span></div>
+<input type="text" id="Editbox2" style="position:absolute;left:82px;top:45px;width:198px;height:23px;line-height:23px;z-index:3;" name="email" value="">
+<div id="wb_Text3" style="position:absolute;left:10px;top:75px;width:62px;height:16px;z-index:4;text-align:left;">
+<span style="color:#000000;font-family:Arial;font-size:13px;">Phone:</span></div>
+<input type="text" id="Editbox3" style="position:absolute;left:82px;top:75px;width:198px;height:23px;line-height:23px;z-index:5;" name="phone" value="">
+<div id="wb_Text4" style="position:absolute;left:10px;top:105px;width:62px;height:16px;z-index:6;text-align:left;">
+<span style="color:#000000;font-family:Arial;font-size:13px;">Subject:</span></div>
+<input type="text" id="Editbox4" style="position:absolute;left:82px;top:105px;width:198px;height:23px;line-height:23px;z-index:7;" name="Editbox4" value="">
+<div id="wb_Text8" style="position:absolute;left:10px;top:135px;width:62px;height:16px;z-index:8;text-align:left;">
+<span style="color:#000000;font-family:Arial;font-size:13px;">Message:</span></div>
+<input type="text" id="Editbox5" style="position:absolute;left:82px;top:135px;width:198px;height:23px;line-height:23px;z-index:9;" name="Editbox5" value="">
+<input type="submit" id="Button1" name="" value="Send" style="position:absolute;left:82px;top:169px;width:96px;height:25px;z-index:10;">
+<input type="reset" id="Button2" name="" value="Reset" style="position:absolute;left:186px;top:169px;width:96px;height:25px;z-index:11;">
+</form>
+</div>
+</div>
+</body>
+</html>
